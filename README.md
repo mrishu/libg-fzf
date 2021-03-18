@@ -1,5 +1,6 @@
-![](libg.gif)
 # genesisfzf
+![](libg.gif)
+![](libg_frame_35_delay-0.13s.gif
 **Library Genesis TUI** using **fzf**.  
 Using this, you can search the library genesis site, filter your book out using `fzf` as well as download the selected book by just pressing `Return`; everything right from your terminal!
 
