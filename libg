@@ -7,30 +7,41 @@ SORT=id
 SORTMODE=ASC
 DEPTH=2
 # SEARCHBY=<blank> (default), author, title, publisher, year, isbn, language, md5, tags, extension
-SEARCHBY=
+SEARCHBY=""
 
 rm -f /tmp/libgdata.file
-SEARCHTERM=$(echo "$@" | tr ' ' '+')
-if [ -z $SEARCHTERM ]; then
+SEARCHTERM="$*"
+if [ -z "$SEARCHTERM" ]; then
 	printf "Enter searchterm: "
-	read inp
-	SEARCHTERM=$(echo "$inp" | tr ' ' '+')
+	read -r SEARCHTERM
 fi
 
 PAGE=1
 while [ "$PAGE" -le "$DEPTH" ]; do
-	URL="https://libgen.is/search.php?req=$SEARCHTERM&sort=$SORT&sortmode=$SORTMODE&page=$PAGE&column=$SEARCHBY"
 	printf "\033[1mGetting Page \033[35m$PAGE... \033[0m"
-	curl -s "$URL" > /tmp/x.html
+
+	curl -s -G "https://libgen.is/search.php" \
+		--data-urlencode "req=$SEARCHTERM" \
+		--data-urlencode "sort=$SORT" \
+		--data-urlencode "sortmode=$SORTMODE" \
+		--data-urlencode "page=$PAGE" \
+		--data-urlencode "column=$SEARCHBY" > /tmp/x.html
+
 	printf "\033[31mCompleted!\033[0m\n"
 	printf "\033[1mScraping Page \033[35m$PAGE... \033[0m"
-	empty=$(grep '<td><b>Edit</b></td></tr></tr></table>' /tmp/x.html)
-	if [ ! -z $empty ]; then
-		echo -e "\033[1mEnd of Results! Nothing on page \033[35m$PAGE!\033[0m"
+	#empty="$(grep '<td><b>Edit</b></td></tr></tr></table>' /tmp/x.html)"
+	#if [ ! -z "$empty" ]; then
+	#	printf "\033[1mEnd of Results! Nothing on page \033[35m$PAGE!\033[0m\n"
+	#	[ "$PAGE" -eq 1 ] && exit
+	#	break
+	#fi
+	if grep -q '<td><b>Edit</b></td></tr></tr></table>' /tmp/x.html; then
+		printf "\033[1mEnd of Results! Nothing on page \033[35m$PAGE!\033[0m\n"
+		[ "$PAGE" -eq 1 ] && exit
 		break
 	fi
 	# Extract the relevant part. Note that we are making only one pass through the file :)
-	sed -i -n ''\ "$(awk '/^<td><b>Edit.*/ {print NR; exit}' /tmp/x.html)"\ ',$p;/^<\/tr><\/table>$/q' /tmp/x.html
+	sed -i -n '/^<td><b>Edit.*/,$p;/^<\/tr><\/table>$/q' /tmp/x.html
 	# -- Cleaning up --
 	# Remove unnecessary part from first line and delete last line
 	sed -i '1s_.*<td_<td_;$d' /tmp/x.html
@@ -83,6 +94,6 @@ id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-
 	--preview-window=up:35% |\
 	awk '{print $NF}')
 [ -z "$id" ] && exit 0;
-firstlink=$(awk -F"\t" '$1=="'$id'" {print $10}' /tmp/libgdata.file | awk '{print $1}')
+firstlink=$(awk -F"\t" '$1=="'"$id"'" {print $10}' /tmp/libgdata.file | awk '{print $1}')
 curl -s "$firstlink" > /tmp/y.html
-wget $(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')
+wget "$(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')"
