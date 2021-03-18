@@ -45,18 +45,18 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 	# Now a author line can consist of three things: series, bookname, ISBNs separated by commas; and all of them separated by <br> tags.
 	# Bookname is a must but others may or may not be there. So, convert the <br> tags to \n so that we can work on them separately.
 	sed 's_</\?font[^>]*>__g' | sed 's_</\?i>__g' | sed '/<a href=['\''"]book\/index\.php/s_<br>_\n_g' |\
-	# Prepend the series lines with \a to mark them and move them to last at the end. And remove the <a> tags around them.
+	# Prepend the series lines with \x01 to mark them and move them to last at the end. And remove the <a> tags around them.
 	sed '/<a href=[^>]*&column=series/s_^_\x01_' | sed '/<a href=[^>]*&column=series/s_</\?a[^>]*>__g' |\
-	# Prepend the book lines with \b to mark them. And remove the <a> tags around them
+	# Prepend the book lines with \x02 to mark them. And remove the <a> tags around them.
 	sed '/<a href=['\''"]book\/index\.php/s_^_\x02_' | sed '/<a href=['\''"]book\/index\.php/s_</\?a[^>]*>__g' |\
-	# Prepend the ISBNs with \v to mark them and move them to last at the end. Also remove the </a> tags which are at the end.
+	# Prepend the ISBNs with \x03 to mark them and move them to last at the end. Also remove the </a> tags which are at the end.
 	# Its the only one that starts with a space.
 	sed '/^\s/s_^\s\(.*\)</a>_\x03\1_' |\
 	# -- Extracting links --
 	# Now remaining <a href...> tags are one with the links. Extract links and remove [edit] link which is meant for Libgen Librarian.
 	sed 's_<a[^>]*href='\''\([^'\'']*\)'\''[^>]*[^<]*</a>_\1 _g' | sed '/https:\/\/library.bz\/main\/edit.*/d' |\
 	# -- Cleanup --
-	# Convert &amp to &, remove <br> tags and &nbsp
+	# Convert &amp to ',', convert <br> tags and &nbsp to spaces.
 	sed 's_&amp;_,_g;s_<br>_ _g;s_&nbsp;_ _g' |\
 	# Convert all newlines to tabspaces and all opening <tr> tags to newlines to separate books. Also remove trailing whitespaces.
 	tr '\n' '\t' | sed 's_<tr[^>]*>_\n_g' | sed 's_\s*$__' |\
