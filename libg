@@ -1,0 +1,88 @@
+#!/bin/sh
+
+# TODO: Improve regular expression for finding and deleting lines with weird numbers (which come up after breaking the title). It just doesnt look nice
+# Modify these
+# SORT=id, author, title, publisher, year, pages, language, filesixe, extension
+SORT=id
+# SORTMODE=ASC, DESC
+SORTMODE=ASC
+DEPTH=2
+# SEARCHBY=<blank> (default), author, title, publisher, year, isbn, language, md5, tags, extension
+SEARCHBY=
+
+rm -f /tmp/libgdata.file
+SEARCHTERM=$(echo "$@" | tr ' ' '+')
+if [ -z $SEARCHTERM ]; then
+	printf "Enter searchterm: "
+	read inp
+	SEARCHTERM=$(echo "$inp" | tr ' ' '+')
+fi
+
+PAGE=1
+while [ "$PAGE" -le "$DEPTH" ]; do
+	URI="https://libgen.is/search.php?req=$SEARCHTERM&sort=$SORT&sortmode=$SORTMODE&page=$PAGE&column=$SEARCHBY"
+	printf "\033[1mGetting Page \033[35m$PAGE... \033[0m"
+	curl -s "$URI" > /tmp/x.html
+	printf "\033[31mCompleted!\033[0m\n"
+	printf "\033[1mScraping Page \033[35m$PAGE... \033[0m"
+	empty=$(grep '<td><b>Edit</b></td></tr></tr></table>' /tmp/x.html)
+	if [ ! -z $empty ]; then
+		echo -e "\033[1mEnd of Results! Nothing on page \033[35m$PAGE!\033[0m"
+		break
+	fi
+	# Extract the relevant part. Note that we are making only one pass through the file :)
+	sed -i -n ''\ "$(awk '/^<td><b>Edit.*/ {print NR; exit}' /tmp/x.html)"\ ',$p;/^<\/tr><\/table>$/q' /tmp/x.html
+	# -- Cleaning up --
+	# Remove unnecessary part from first line and delete last line
+	sed -i '1s_.*<td_<td_;$d' /tmp/x.html
+	# Delete lines of closing </tr> tags
+	sed '/^\t*<\/tr>$\|^$/d' /tmp/x.html |\
+	# Remove opening <td> and closing </td> tags along with \r's
+	sed 's_\t*</\?td[^>]*>\r\?__g' |\
+	# -- Extracting authors --
+	sed 's_<a [^>]*author["'\'']>\([^<]*\)</a>_\1_g' |\
+	# -- Extracting bookname --
+	# Remove <font> and <i> tags first.
+	# Now a author line can consist of three things: series, bookname, some numbers separated by commas (dont know what they are) and all separated by <br> tags.
+	# Bookname is a must but others may or may not be there. So, convert the first <br> to \n so that we can work on them separately.
+	sed 's_</\?font[^>]*>__g' | sed 's_</\?i>__g' | sed '/<a href=['\''"]book\/index\.php/s_<br>_\n_g' |\
+	# Now, delete the lines with numbers. Its the only one that starts with a space
+	sed '/^\s/d' |\
+	# Remove the <a> tags around bookname line
+	sed '/<a href=['\''"]book\/index\.php/s_</\?a[^>]*>__g' |\
+	# Prepend the series line with \a. And remove the <a> tags arround it.
+	sed '/<a href=[^>]*&column=series/s_^_\a_' | sed '/<a href=[^>]*&column=series/s_</\?a[^>]*>__g' |\
+	# -- Extracting links --
+	# Now remaining <a href... tags are one with the links. Extract links and remove [edit] link which is meant for Libgen Librarian
+	sed 's_<a[^>]*href='\''\([^'\'']*\)'\''[^>]*[^<]*</a>_\1 _g' | sed '/https:\/\/library.bz\/main\/edit.*/d' |\
+	# -- Cleanup --
+	# Convert &amp to &, remove <br> tags and &nbsp
+	sed 's_&amp;_,_g;s_<br>_ _g;s_&nbsp;_ _g' |\
+	# Convert all newlines to tabspaces and all opening <tr> tags to newlines to separate books. Also remove trailing whitespaces
+	tr '\n' '\t' | sed 's_<tr[^>]*>_\n_g' | sed 's_\s*$__' |\
+	# -- Moving Series info to last --
+	# Move the series field to the last because it may or may not be present. Also remove \a's
+	sed 's_\(\t\a[^\t]*\)\(.*\)_\2\1_' >> /tmp/libgdata.file
+	printf "\033[31mCompleted!\033[0m\n"
+	PAGE=$(( PAGE + 1 ))
+done
+
+# ID, Author, Title, Publisher, Year, Pages, Language, Size, Extension, Links, [Series] -> 1,2,3,4,5,6,7,8,9,10,11
+id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-s\n", $2, $3, $5, $8, $9, $1)}' /tmp/libgdata.file |\
+	fzf  --ansi --preview 'awk -F"\t" '\''$1 == '\''{-1}'\'' \
+	{printf("\033[1m\033[31mID:\033[0m %s\
+		\n\033[1m\033[31mAuthors:\033[0m %s\
+		\n\033[1m\033[31mTitle:\033[0m %s\
+		\n\t\033[1m\033[35mSeries:\033[0m %s\
+		\n\033[1m\033[31mPublisher:\033[0m %s\
+		\n\033[1m\033[31mYear:\033[0m %s\
+		\n\033[1m\033[31mPages:\033[0m %s\
+		\n\033[1m\033[31mLanguage:\033[0m %s\
+		\n\033[1m\033[31mSize:\033[0m %s\
+		\n\033[1m\033[31mExtension:\033[0m %s", $1,$2,$3,$11,$4,$5,$6,$7,$8,$9)}'\'' /tmp/libgdata.file'\
+	--preview-window=up:35% |\
+	awk '{print $NF}')
+[ -z "$id" ] && exit 0;
+firstlink=$(awk -F"\t" '$1=="'$id'" {print $10}' /tmp/libgdata.file | awk '{print $1}')
+curl -s "$firstlink" > /tmp/y.html
+wget $(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')
