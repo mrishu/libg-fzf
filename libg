@@ -77,6 +77,7 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 	# -- Moving Series and ISBNs to last --
 	sed 's_\(\t\x01[^\t]*\)\?\(\t\x02[^\t]*\)\(\t\x03[^\t]*\)\?\(.*\)_\2\4\t\1\3_' |\
 	sed 's_\t\x01_\x01_' >> /tmp/libgdata.file
+	printf "\n" >> /tmp/libgdata.file
 	printf "\033[31mCompleted!\033[0m\n"
 	PAGE=$(( PAGE + 1 ))
 done
