@@ -100,4 +100,5 @@ id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-
 [ -z "$id" ] && exit 0;
 firstlink=$(awk -F"\t" '$1=="'"$id"'" {print $10}' /tmp/libgdata.file | awk '{print $1}')
 curl -s "$firstlink" > /tmp/y.html
-wget "$(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')"
+DOWNLOAD_URL=$(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')
+wget $DOWNLOAD_URL
