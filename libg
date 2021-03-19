@@ -26,7 +26,7 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 		--data-urlencode "req=$SEARCHTERM" \
 		--data-urlencode "sort=$SORT" \
 		--data-urlencode "sortmode=$SORTMODE" \
-		--date-urlencode "res=$RESPERPAGE" \
+		--data-urlencode "res=$RESPERPAGE" \
 		--data-urlencode "page=$PAGE" \
 		--data-urlencode "column=$SEARCHBY" > /tmp/x.html
 
