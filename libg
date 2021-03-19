@@ -75,7 +75,8 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 	# Convert all newlines to tabspaces and all opening <tr> tags to newlines to separate books. Also remove trailing whitespaces.
 	tr '\n' '\t' | sed 's_<tr[^>]*>_\n_g' | sed 's_\s*$__' |\
 	# -- Moving Series and ISBNs to last --
-	sed 's_\t\?\(\x01[^\t]*\)\?\(\t\x02[^\t]*\)\(\t\x03[^\t]*\)\?\(.*\)_\2\4\t\1\3_' >> /tmp/libgdata.file
+	sed 's_\(\t\x01[^\t]*\)\?\(\t\x02[^\t]*\)\(\t\x03[^\t]*\)\?\(.*\)_\2\4\t\1\3_' |\
+	sed 's_\t\x01_\x01_' >> /tmp/libgdata.file
 	printf "\033[31mCompleted!\033[0m\n"
 	PAGE=$(( PAGE + 1 ))
 done
