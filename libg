@@ -8,6 +8,8 @@ SORTMODE=ASC
 DEPTH=2
 # SEARCHBY=<blank> (default), author, title, publisher, year, isbn, language, md5, tags, extension
 SEARCHBY=""
+# RESPERPAGE=25,50,100 (Any other value gives 25 reults only). (Results per page)
+RESPERPAGE=100
 
 rm -f /tmp/libgdata.file
 SEARCHTERM="$*"
@@ -24,6 +26,7 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 		--data-urlencode "req=$SEARCHTERM" \
 		--data-urlencode "sort=$SORT" \
 		--data-urlencode "sortmode=$SORTMODE" \
+		--date-urlencode "res=$RESPERPAGE" \
 		--data-urlencode "page=$PAGE" \
 		--data-urlencode "column=$SEARCHBY" > /tmp/x.html
 
