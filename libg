@@ -1,13 +1,14 @@
 #!/bin/sh
 
 # Modify these as you want
-# SORT=id, author, title, publisher, year, pages, language, filesixe, extension
-SORT=id
-# SORTMODE=ASC, DESC
-SORTMODE=ASC
-DEPTH=2
+# SORT=<blank> (default), id, author, title, publisher, year, pages, language, filesixe, extension
+SORT=""
+# SORTMODE=<blank> (deafult), ASC, DESC
+SORTMODE=""
 # SEARCHBY=<blank> (default), author, title, publisher, year, isbn, language, md5, tags, extension
 SEARCHBY=""
+# DEPTH is the number of result pages to be scraped
+DEPTH=1
 # RESPERPAGE=25,50,100 (Any other value gives 25 reults only). (Results per page)
 RESPERPAGE=100
 
