@@ -23,5 +23,4 @@ The other dependencies are `sed`(GNU), `awk`, `curl` and `wget` but are present 
 
 ## Todos
 1. Add command line options for changing `SORT`, `SORTMODE`, `DEPTH`, `SEARCHBY` and `RESPERPAGE` variables.
-2. Add caching option. For e.g. if someone has searched something and scraped some pages already, then data of those pages can be cached for future use. If suppose the user searches for the same search term again with the same options, then a prompt may come up asking if the user wants to use cached data. If the `DEPTH` of the current search is less than the `DEPTH` of cached search, then the cached search will be used. If the `DEPTH` of current search is more, the scraping will start from the end of the cached search.
-3. Add option for selecting different mirrors.
+2. Add option for selecting different mirrors.
