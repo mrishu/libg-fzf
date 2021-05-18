@@ -10,7 +10,7 @@ Using this, you can search the library genesis site, filter your book out using 
 
 ### Options:
  `-b <value>` 'Search By': `author`, `title`, `publisher`, `year`, `isbn`, `language`, `md5`, `tags`, `extension`.  
-	`-n <value>`	'Number of Results: Any positive integer. (Defaults to 100).  
+	`-n <value>`	'Number of Results': Any positive integer.  
 	`-s <value>`	'Sort Results By': `id`, `author`, `title`, `publisher`, `year`, `pages`, `language`, `filesize`, `extension`.  
 	`-o <value>`	'Sort Results in Order': `ASC`/`asc` (for ascending order), `DESC`/`desc` (for descending order).  
 	
