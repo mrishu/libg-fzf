@@ -1,17 +1,74 @@
 #!/bin/sh
 
-# Modify these as you want
-# SORT=<blank> (default), id, author, title, publisher, year, pages, language, filesixe, extension
-SORT=""
-# SORTMODE=<blank> (deafult), ASC, DESC
-SORTMODE=""
-# SEARCHBY=<blank> (default), author, title, publisher, year, isbn, language, md5, tags, extension
-SEARCHBY=""
-# DEPTH is the number of result pages to be scraped
-DEPTH=1
-# RESPERPAGE=25,50,100 (Any other value gives 25 reults only). (Results per page)
-RESPERPAGE=100
+basic_help() {
+	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\n"
+	printf "USAGE: libg [OPTIONS] <search query>\n"
+	printf "  OPTIONS:\n"
+	printf "\t-b <value>\t'Search By': author, title, publisher, year, isbn, language, md5, tags, extension.\n"
+	printf "\t-n <value>\t'Number of Results: Any positive integer. (Defaults to 100).\n"
+	printf "\t-s <value>\t'Sort Results By': id, author, title, publisher, year, pages, language, filesize, extension.\n"
+	printf "\t-o <value>\t'Sort Results in Order': ASC/asc (for ascending order), DESC/desc (for descending order).\n"
+	printf "NOTE: -n <value> can take in any positive integer value, but can only produce results in numbers of 25, 50 or multiples of 100.\n"
+	printf "      [1-25] will give 25 results, [26-50] will give 50 results, [50-100] will give 100 results,\n"
+	printf "      [101-200] will give 200 results, [201-300] will give 300 results and so on.\n"
+	printf "      (Obviously upto available number of search results).\n"
 
+}
+
+# -- PARSE OPTIONS --
+while getopts b:n:s:o:h opt; do
+	case "$opt" in
+		# SEARCHBY: author, title, publisher, year, isbn, language, md5, tags, extension
+		b) SEARCHBY="$OPTARG" ;;
+		# NUMRESULTS: Number of results (Defaults to 100)
+		n) NUMRESULTS="$OPTARG" ;;
+		# SORTBY: id, author, title, publisher, year, pages, language, filesize, extension
+		s) SORTBY="$OPTARG" ;;
+		# SORTORDER: ASC, DESC
+		o) SORTORDER="$OPTARG" ;;
+		h) basic_help && exit 0 ;;
+		\?) basic_help && exit 1 ;;
+	esac
+done
+shift $(( OPTIND-1 ))
+
+# Default NUMRESULTS (Number of Results) to 100
+[ -z "$NUMRESULTS" ] && NUMRESULTS=100
+
+# Convert NUMRESULTS (Number of results) to resperpage (Number of results per page) and depth (Number of search pages scraped) optimally.
+# NOTE: resperpage can take values only from 25,50,100. Any other value will give 25 results.
+depth=1
+if [ "$NUMRESULTS" -ge 1 ] && [ "$NUMRESULTS" -le 25 ]; then
+	resperpage=25
+elif [ "$NUMRESULTS" -ge 26 ] && [ "$NUMRESULTS" -le 50 ]; then
+	resperpage=50
+elif [ "$NUMRESULTS" -ge 51 ] && [ "$NUMRESULTS" -le 100 ]; then
+	resperpage=100
+elif [ "$NUMRESULTS" -gt 100 ] && [ $(( "$NUMRESULTS" % 100 )) -eq 0 ]; then
+	resperpage=100 && depth=$(( "$NUMRESULTS" / 100 ))
+elif [ "$NUMRESULTS" -gt 100 ] && [ $(( "$NUMRESULTS" % 100 )) -gt 0 ]; then
+	resperpage=100 && depth=$(( "$NUMRESULTS" / 100 + 1 ))
+else
+	printf "\033[31mERR\033[0m: Invalid Value for -n option! It can only take in a positive integer.\n" && exit 1
+fi
+
+# -- CHECK VALIDITY OF OPTIONS --
+case "$SEARCHBY" in
+	"") ;; author) ;; title) ;; publisher) ;; year) ;; isbn) ;; language) ;; md5) ;; tags) ;; extension) ;;
+	*) printf "\033[31mERR\033[0m: Invalid Value for -b option!\nAllowed values: author, title, publisher, year, isbn, language, md5, tags, extension.\n" && exit 1 ;;
+esac
+
+case "$SORTBY" in
+	"") ;; id) ;; author) ;; title) ;; publisher) ;; year) ;; pages) ;; language) ;; filesize) ;; extension) ;;
+	*) printf "\033[31mERR\033[0m: Invalid Value for -s option!\nAllowed values: id, author, title, publisher, year, pages, language, filesize, extension.\n" && exit 1 ;;
+esac
+
+case "$SORTORDER" in
+	"") ;; ASC) ;; DESC) ;; asc) SORTORDER="ASC" ;; desc) SORTORDER="DESC" ;;
+	*) printf "\033[31mERR\033[0m: Invalid Value for -o option!\nAllowed values: ASC/asc for ascending order, DESC/desc for descending order.\n" && exit 1 ;;
+esac
+
+# -- GET SEARCH TERMS --
 rm -f /tmp/libgdata.file
 SEARCHTERM="$*"
 if [ -z "$SEARCHTERM" ]; then
@@ -19,23 +76,26 @@ if [ -z "$SEARCHTERM" ]; then
 	read -r SEARCHTERM
 fi
 
-PAGE=1
-while [ "$PAGE" -le "$DEPTH" ]; do
-	printf "\033[1mGetting Page \033[35m$PAGE... \033[0m"
+# -- SCRAPING --
+page=1
+while [ "$page" -le "$depth" ]; do
+	printf "\033[1mGetting Page \033[35m$page... \033[0m"
 
 	curl -s -G "https://libgen.is/search.php" \
 		--data-urlencode "req=$SEARCHTERM" \
-		--data-urlencode "sort=$SORT" \
-		--data-urlencode "sortmode=$SORTMODE" \
-		--data-urlencode "res=$RESPERPAGE" \
-		--data-urlencode "page=$PAGE" \
-		--data-urlencode "column=$SEARCHBY" > /tmp/x.html
+		--data-urlencode "column=$SEARCHBY" \
+		--data-urlencode "res=$resperpage" \
+		--data-urlencode "page=$page" \
+		--data-urlencode "sort=$SORTBY" \
+		--data-urlencode "sortmode=$SORTORDER" > /tmp/x.html
+	status="$?"
+	[ "$status" -eq 6 ] && printf "\033[31mFailed!\nERR\033[0m: Couldn't connect to Library Genesis! Check you internet connection and try again!\n" && exit 2
 
-	printf "\033[31mCompleted!\033[0m\n"
-	printf "\033[1mScraping Page \033[35m$PAGE... \033[0m"
+	printf "\033[32mCompleted!\033[0m\n"
+	printf "\033[1mScraping Page \033[35m$page... \033[0m"
 	if grep -q '<td><b>Edit</b></td></tr></tr></table>' /tmp/x.html; then
-		printf "\033[1mEnd of Results! Nothing on page \033[35m$PAGE!\033[0m\n"
-		[ "$PAGE" -eq 1 ] && exit
+		printf "\033[1mEnd of Results! Nothing on page \033[35m$page!\033[0m\n"
+		[ "$page" -eq 1 ] && exit
 		break
 	fi
 	# Extract the relevant part. Note that we are making only one pass through the file :)
@@ -73,10 +133,11 @@ while [ "$PAGE" -le "$DEPTH" ]; do
 	sed 's_\(\t\x01[^\t]*\)\?\(\t\x02[^\t]*\)\(\t\x03[^\t]*\)\?\(.*\)_\2\4\t\1\3_' |\
 	sed 's_\t\x01_\x01_' >> /tmp/libgdata.file
 	printf "\n" >> /tmp/libgdata.file
-	printf "\033[31mCompleted!\033[0m\n"
-	PAGE=$(( PAGE + 1 ))
+	printf "\033[32mCompleted!\033[0m\n"
+	page=$(( page+1 ))
 done
 
+# -- DISPLAYING IN FZF --
 # ID, Author, Title, Publisher, Year, Pages, Language, Size, Extension, Links, [Series], [ISBNs] -> 1,2,3,4,5,6,7,8,9,10,11,12
 id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-s\n", $2, $3, $5, $8, $9, $1)}' /tmp/libgdata.file |\
 	fzf  --ansi --preview 'awk -F"\t" '\''$1 == '\''{-1}'\'' \
@@ -94,6 +155,8 @@ id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-
 	--preview-window=up:35% |\
 	awk '{print $NF}')
 [ -z "$id" ] && exit 0;
+
+# -- DOWNLOADING --
 firstlink=$(awk -F"\t" '$1=="'"$id"'" {print $10}' /tmp/libgdata.file | awk '{print $1}')
 curl -s "$firstlink" > /tmp/y.html
 DOWNLOAD_URL=$(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')
