@@ -3,7 +3,7 @@
 DEFAULT_SEARCHBY=""
 DEFAULT_NUMRESULTS=100
 DEFAULT_SORTBY=""
-DEFAULT_SORTORDER
+DEFAULT_SORTORDER=""
 
 basic_help() {
 	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\n"
