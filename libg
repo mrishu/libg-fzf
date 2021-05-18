@@ -1,5 +1,10 @@
 #!/bin/sh
 
+DEFAULT_SEARCHBY=""
+DEFAULT_NUMRESULTS=100
+DEFAULT_SORTBY=""
+DEFAULT_SORTORDER
+
 basic_help() {
 	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\n"
 	printf "USAGE: libg [OPTIONS] <search query>\n"
@@ -33,7 +38,7 @@ done
 shift $(( OPTIND-1 ))
 
 # Default NUMRESULTS (Number of Results) to 100
-[ -z "$NUMRESULTS" ] && NUMRESULTS=100
+[ -z "$NUMRESULTS" ] && NUMRESULTS="$DEFAULT_NUMRESULTS"
 
 # Convert NUMRESULTS (Number of results) to resperpage (Number of results per page) and depth (Number of search pages scraped) optimally.
 # NOTE: resperpage can take values only from 25,50,100. Any other value will give 25 results.
@@ -54,17 +59,17 @@ fi
 
 # -- CHECK VALIDITY OF OPTIONS --
 case "$SEARCHBY" in
-	"") ;; author) ;; title) ;; publisher) ;; year) ;; isbn) ;; language) ;; md5) ;; tags) ;; extension) ;;
+	"") SEARCHBY="$DEFAULT_SEARCHBY" ;; author) ;; title) ;; publisher) ;; year) ;; isbn) ;; language) ;; md5) ;; tags) ;; extension) ;;
 	*) printf "\033[31mERR\033[0m: Invalid Value for -b option!\nAllowed values: author, title, publisher, year, isbn, language, md5, tags, extension.\n" && exit 1 ;;
 esac
 
 case "$SORTBY" in
-	"") ;; id) ;; author) ;; title) ;; publisher) ;; year) ;; pages) ;; language) ;; filesize) ;; extension) ;;
+	"") SORTBY="$DEFAULT_SORTBY" ;; id) ;; author) ;; title) ;; publisher) ;; year) ;; pages) ;; language) ;; filesize) ;; extension) ;;
 	*) printf "\033[31mERR\033[0m: Invalid Value for -s option!\nAllowed values: id, author, title, publisher, year, pages, language, filesize, extension.\n" && exit 1 ;;
 esac
 
 case "$SORTORDER" in
-	"") ;; ASC) ;; DESC) ;; asc) SORTORDER="ASC" ;; desc) SORTORDER="DESC" ;;
+	"") SORTORDER="$DEFAULT_SORTORDER" ;; ASC) ;; DESC) ;; asc) SORTORDER="ASC" ;; desc) SORTORDER="DESC" ;;
 	*) printf "\033[31mERR\033[0m: Invalid Value for -o option!\nAllowed values: ASC/asc for ascending order, DESC/desc for descending order.\n" && exit 1 ;;
 esac
 
