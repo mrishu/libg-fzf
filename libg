@@ -51,7 +51,7 @@ elif [ "$NUMRESULTS" -ge 51 ] && [ "$NUMRESULTS" -le 100 ]; then
 	resperpage=100
 elif [ "$NUMRESULTS" -gt 100 ] && [ $(( NUMRESULTS % 100 )) -eq 0 ]; then
 	resperpage=100 && depth=$(( NUMRESULTS / 100 ))
-elif [ "$NUMRESULTS" -gt 100 ] && [ $(( NUMRESULTS % 100 )) -gt 0 ]; then
+elif [ "$NUMRESULTS" -gt 100 ]; then
 	resperpage=100 && depth=$(( NUMRESULTS / 100 + 1 ))
 else
 	printf "\033[31mERR\033[0m: Invalid Value for -n option! It can only take in a positive integer.\n" && exit 1
