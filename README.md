@@ -15,8 +15,7 @@ Using this, you can search the library genesis site, filter your book out using 
 	`-o <value>`	'Sort Results in Order': `ASC`/`asc` (for ascending order), `DESC`/`desc` (for descending order).  
 	
 **NOTE**: `-n <value>` can take in any positive integer value, but can only produce results in numbers of 25, 50 or multiples of 100.  
-      [1-25] will give 25 results, [26-50] will give 50 results, [50-100] will give 100 results,  
-      [101-200] will give 200 results, [201-300] will give 300 results and so on.  
+      [1-25] will give 25 results, [26-50] will give 50 results, [50-100] will give 100 results, [101-200] will give 200 results, [201-300] will give 300 results and so on.  
       (Obviously upto available number of search results).
 
 ## Installation
