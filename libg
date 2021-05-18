@@ -10,7 +10,7 @@ basic_help() {
 	printf "USAGE: libg [OPTIONS] <search query>\n"
 	printf "  OPTIONS:\n"
 	printf "\t-b <value>\t'Search By': author, title, publisher, year, isbn, language, md5, tags, extension.\n"
-	printf "\t-n <value>\t'Number of Results: Any positive integer. (Defaults to 100).\n"
+	printf "\t-n <value>\t'Number of Results: Any positive integer.\n"
 	printf "\t-s <value>\t'Sort Results By': id, author, title, publisher, year, pages, language, filesize, extension.\n"
 	printf "\t-o <value>\t'Sort Results in Order': ASC/asc (for ascending order), DESC/desc (for descending order).\n"
 	printf "NOTE: -n <value> can take in any positive integer value, but can only produce results in numbers of 25, 50 or multiples of 100.\n"
@@ -37,7 +37,7 @@ while getopts b:n:s:o:h opt; do
 done
 shift $(( OPTIND-1 ))
 
-# Default NUMRESULTS (Number of Results) to 100
+# Default NUMRESULTS (Number of Results) to $DEFAULT_NUMRESULTS
 [ -z "$NUMRESULTS" ] && NUMRESULTS="$DEFAULT_NUMRESULTS"
 
 # Convert NUMRESULTS (Number of results) to resperpage (Number of results per page) and depth (Number of search pages scraped) optimally.
