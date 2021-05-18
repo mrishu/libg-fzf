@@ -19,7 +19,7 @@ Using this, you can search the library genesis site, filter your book out using 
       (Obviously upto available number of search results).
 
 ## Installation
-Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `PATH`.
+Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `PATH`. Also, you can change the default values for each option in the first few lines of the script.
  
 ## Dependency
 The only dependency is `fzf`: https://github.com/junegunn/fzf.   
