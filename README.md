@@ -6,7 +6,7 @@
 Using this, you can search the library genesis site, filter your book out using `fzf` as well as download the selected book by just pressing `Return`; everything right from your terminal!
 
 ## Usage
-`libg [OPTIONS] <search query>`.
+`libg [OPTIONS] <search query>`
 
 ### Options:
  `-b <value>` 'Search By': `author`, `title`, `publisher`, `year`, `isbn`, `language`, `md5`, `tags`, `extension`.  
