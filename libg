@@ -1,32 +1,37 @@
 #!/bin/sh
 
 DEFAULT_SEARCHBY=""
-DEFAULT_NUMRESULTS=100
+DEFAULT_RESPERPAGE=100
+DEFAULT_DEPTH=1
 DEFAULT_SORTBY=""
 DEFAULT_SORTORDER=""
 
 basic_help() {
 	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\n"
 	printf "USAGE: libg [OPTIONS] <search query>\n"
-	printf "  OPTIONS:\n"
+	printf "  OPTIONS: Allowed values\n"
 	printf "\t-b <value>\t'Search By': author, title, publisher, year, isbn, language, md5, tags, extension.\n"
-	printf "\t-n <value>\t'Number of Results: Any positive integer.\n"
+	printf "\t-n <value>\t'Number of Search Results per Page': 25, 50, 100.\n"
+	printf "\t-d <value>\t'Depth'(Number of result pages to scan): Any positive integer.\n"
 	printf "\t-s <value>\t'Sort Results By': id, author, title, publisher, year, pages, language, filesize, extension.\n"
-	printf "\t-o <value>\t'Sort Results in Order': ASC/asc (for ascending order), DESC/desc (for descending order).\n"
-	printf "NOTE: -n <value> can take in any positive integer value, but can only produce results in numbers of 25, 50 or multiples of 100.\n"
-	printf "      [1-25] will give 25 results, [26-50] will give 50 results, [50-100] will give 100 results,\n"
-	printf "      [101-200] will give 200 results, [201-300] will give 300 results and so on.\n"
-	printf "      (Obviously upto available number of search results).\n"
-
+	printf "\t-o <value>\t'Sort Order': ASC/asc (for ascending order), DESC/desc (for descending order).\n"
+	printf "\n  Current Defaults: (Can be changed by editing the script)\n"
+	printf "\t'Search By': $DEFAULT_SEARCHBY\n"
+	printf "\t'Number of Search Results per Page': $DEFAULT_RESPERPAGE\n"
+	printf "\t'Depth': $DEFAULT_DEPTH\n"
+	printf "\t'Sort Results By': $DEFAULT_SEARCHBY\n"
+	printf "\t'Sort Order': $DEFAULT_SORTORDER\n"
 }
 
 # -- PARSE OPTIONS --
-while getopts b:n:s:o:h opt; do
+while getopts b:n:d:s:o:h opt; do
 	case "$opt" in
 		# SEARCHBY: author, title, publisher, year, isbn, language, md5, tags, extension
 		b) SEARCHBY="$OPTARG" ;;
-		# NUMRESULTS: Number of results (Defaults to 100)
-		n) NUMRESULTS="$OPTARG" ;;
+		# RESPERPAGE: 25, 50, 100
+		n) RESPERPAGE="$OPTARG" ;;
+		# DEPTH: Any positive integer
+		d) DEPTH="$OPTARG" ;;
 		# SORTBY: id, author, title, publisher, year, pages, language, filesize, extension
 		s) SORTBY="$OPTARG" ;;
 		# SORTORDER: ASC, DESC
@@ -37,30 +42,24 @@ while getopts b:n:s:o:h opt; do
 done
 shift $(( OPTIND-1 ))
 
-# Default NUMRESULTS (Number of Results) to $DEFAULT_NUMRESULTS
-[ -z "$NUMRESULTS" ] && NUMRESULTS="$DEFAULT_NUMRESULTS"
-
-# Convert NUMRESULTS (Number of results) to resperpage (Number of results per page) and depth (Number of search pages scraped) optimally.
-# NOTE: resperpage can take values only from 25,50,100. Any other value will give 25 results.
-depth=1
-if [ "$NUMRESULTS" -ge 1 ] && [ "$NUMRESULTS" -le 25 ]; then
-	resperpage=25
-elif [ "$NUMRESULTS" -ge 26 ] && [ "$NUMRESULTS" -le 50 ]; then
-	resperpage=50
-elif [ "$NUMRESULTS" -ge 51 ] && [ "$NUMRESULTS" -le 100 ]; then
-	resperpage=100
-elif [ "$NUMRESULTS" -gt 100 ] && [ $(( NUMRESULTS % 100 )) -eq 0 ]; then
-	resperpage=100 && depth=$(( NUMRESULTS / 100 ))
-elif [ "$NUMRESULTS" -gt 100 ]; then
-	resperpage=100 && depth=$(( NUMRESULTS / 100 + 1 ))
-else
-	printf "\033[31mERR\033[0m: Invalid Value for -n option! It can only take in a positive integer.\n" && exit 1
-fi
-
 # -- CHECK VALIDITY OF OPTIONS --
 case "$SEARCHBY" in
 	"") SEARCHBY="$DEFAULT_SEARCHBY" ;; author) ;; title) ;; publisher) ;; year) ;; isbn) ;; language) ;; md5) ;; tags) ;; extension) ;;
 	*) printf "\033[31mERR\033[0m: Invalid Value for -b option!\nAllowed values: author, title, publisher, year, isbn, language, md5, tags, extension.\n" && exit 1 ;;
+esac
+
+case "$RESPERPAGE" in
+	"") RESPERPAGE="$DEFAULT_RESPERPAGE" ;;
+	0) printf "\033[31mERR\033[0m: Invalid Value for -n option!\nAllowed values: 25, 50, 100.\n" && exit 1 ;;
+	[0-9]*) ;;
+	*) printf "\033[31mERR\033[0m: Invalid Value for -n option!\nAllowed values: 25, 50, 100.\n" && exit 1 ;;
+esac
+
+case "$DEPTH" in
+	"") DEPTH="$DEFAULT_DEPTH" ;;
+	0) printf "\033[31mERR\033[0m: Invalid Value for -d option!\nAllowed values: Any positive integer.\n" && exit 1 ;;
+	[0-9]*) ;;
+	*) printf "\033[31mERR\033[0m: Invalid Value for -d option!\nAllowed values: Any positive integer.\n" && exit 1 ;;
 esac
 
 case "$SORTBY" in
@@ -83,13 +82,13 @@ fi
 
 # -- SCRAPING --
 page=1
-while [ "$page" -le "$depth" ]; do
+while [ "$page" -le "$DEPTH" ]; do
 	printf "\033[1mGetting Page \033[35m$page... \033[0m"
 
 	curl -s -G "https://libgen.is/search.php" \
 		--data-urlencode "req=$SEARCHTERM" \
 		--data-urlencode "column=$SEARCHBY" \
-		--data-urlencode "res=$resperpage" \
+		--data-urlencode "res=$RESPERPAGE" \
 		--data-urlencode "page=$page" \
 		--data-urlencode "sort=$SORTBY" \
 		--data-urlencode "sortmode=$SORTORDER" > /tmp/x.html
@@ -166,4 +165,4 @@ firstlink=$(awk -F"\t" '$1=="'"$id"'" {print $10}' /tmp/libgdata.file | awk '{pr
 curl -s "$firstlink" > /tmp/y.html
 DOWNLOAD_URL=$(grep '<h2><a href=[^>]*>GET</a></h2>' /tmp/y.html | sed 's_<h2><a href=["'\'']\(.*\)["'\'']>GET</a></h2>_\1_')
 wget $DOWNLOAD_URL
-rm -f /tmp/libgdata.file /tmp/x.html /tmp/y.html
+rm -f /tmp/x.html /tmp/y.html
