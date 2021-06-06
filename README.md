@@ -9,11 +9,11 @@ Using this, you can search the library genesis site, filter your book out using 
 `libg [OPTIONS] <search query>`
 
 ### Options:
- 	`-b <value>`	'Search By': `author, title, publisher, year, isbn, language, md5, tags, extension`.  
-	`-n <value>`	'Number of Search Results per Page': `25, 50, 100`.  
-	`-d <value>`	'Depth'(Number of Result pages to scan): Any positive integer.  
-	`-s <value>`	'Sort Results By': `id, author, title, publisher, year, pages, language, filesize, extension`.  
-	`-o <value>`	'Sort Order': `ASC`/`asc` (for ascending order), `DESC`/`desc` (for descending order).  
+ 	-b <value>	'Search By': author, title, publisher, year, isbn, language, md5, tags, extension.  
+	-n <value>	'Number of Search Results per Page': 25, 50, 100.  
+	-d <value>	'Depth'(Number of Result pages to scan): Any positive integer.  
+	-s <value>	'Sort Results By': id, author, title, publisher, year, pages, language, filesize, extension.  
+	-o <value>	'Sort Order': ASC/asc (for ascending order), DESC/desc (for descending order).  
 
 ## Installation
 Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `PATH`. Also, you can change the default values for each option in the first few lines of the script.
