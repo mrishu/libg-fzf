@@ -2,7 +2,7 @@
 ![](libg.gif)
 
 **Library Genesis TUI** using **fzf**.  
-Using this, you can search the library genesis site, filter your book out using `fzf` as well as download the selected book by just pressing `Return`; everything right from your terminal!
+Using this, you can search the library genesis site, filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
 
 ## Usage
 `libg [OPTIONS] <search query>`
