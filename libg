@@ -154,7 +154,7 @@ id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-
 		\n\033[1m\033[31mLanguage:\033[0m %s\
 		\n\033[1m\033[31mSize:\033[0m %s\
 		\n\033[1m\033[31mExtension:\033[0m %s", $1,$2,$3,$11,$12,$4,$5,$6,$7,$8,$9)}'\'' '"$data_file"''\
-	--no-sort --preview-window=up:35% |\
+	--preview-window=up:35% |\
 	awk '{print $NF}')
 [ -z "$id" ] && exit 0;
 
