@@ -9,13 +9,13 @@ Using this, you can search the library genesis site, filter your book out using 
 
 ### Options:
 ```
-	OPTIONS        Description                               Allowed Values
-	-------        -----------                               --------------
-	-b <value>     Search By                                 author, title, publisher, year, isbn, language, md5, tags, extension.
-	-n <value>     Number of Search Results per Page         25, 50, 100.
-	-d <value>     Depth (Number of result pages to scan)    Any positive integer.
-	-s <value>     Sort Results By                           id, author, title, publisher, year, pages, language, filesize, extension.
-	-r             Reverse/Desecending Order
+OPTIONS        Description                               Allowed Values
+-------        -----------                               --------------
+-b <value>     Search By                                 author, title, publisher, year, isbn, language, md5, tags, extension.
+-n <value>     Number of Search Results per Page         25, 50, 100.
+-d <value>     Depth (Number of result pages to scan)    Any positive integer.
+-s <value>     Sort Results By                           id, author, title, publisher, year, pages, language, filesize, extension.
+-r             Reverse/Desecending Order
 ```
 
 ## Installation
