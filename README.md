@@ -23,6 +23,3 @@ Since it is just a small shell script, just download the script, give it executa
 ## Dependency
 The only dependency is `fzf`: https://github.com/junegunn/fzf.   
 The other dependencies are `sed`(GNU), `awk`, `curl` and `wget` but are present by default in most Linux installs. 
-
-## Todos
-1. Add option for selecting different mirrors.
