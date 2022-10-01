@@ -1,4 +1,4 @@
-# genesisfzf
+# library_genesis-fzf (libg-fzf)
 ![](libg.gif)
 
 **Library Genesis TUI** using **fzf**.  
