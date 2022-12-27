@@ -1,7 +1,8 @@
 #!/bin/sh
 
-DEFAULT_RESPERPAGE=100
-DEFAULT_DEPTH=1
+DEFAULT_RESPERPAGE=100 # default number of search results per page
+DEFAULT_DEPTH=1 # default result pages to scan
+LIBGEN_MIRROR="https://libgen.rs" # Alternatives : *.is, *.rs, *.st
 
 basic_help() {
 	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\
@@ -16,7 +17,8 @@ basic_help() {
 	\n\nCurrent Defaults (Can be changed by editing the script)\
 	\n----------------\
 	\nNumber of Search Results per Page       $DEFAULT_RESPERPAGE\
-	\nDepth                                   $DEFAULT_DEPTH"
+	\nDepth                                   $DEFAULT_DEPTH\
+	\nLibgen Mirror                           $LIBGEN_MIRROR\n"
 }
 
 # -- PARSE OPTIONS --
@@ -83,7 +85,7 @@ data_file="$(mktemp)"
 while [ "$page" -le "$DEPTH" ]; do
 	printf "\033[1mGetting Page \033[35m$page... \033[0m"
 
-	curl -s -G "https://libgen.rs/search.php" \
+	curl -s -G "$LIBGEN_MIRROR/search.php" \
 		--data-urlencode "req=$SEARCHTERM" \
 		--data-urlencode "column=$SEARCHBY" \
 		--data-urlencode "res=$RESPERPAGE" \
@@ -156,29 +158,29 @@ id=$(awk -F "\t" '{printf("%-30.30s | %-70.70s | %-16.16s | %-7.7s | %-4.4s | %-
 		\n\033[1m\033[31mExtension:\033[0m %s", $1,$2,$3,$11,$12,$4,$5,$6,$7,$8,$9)}'\'' '"$data_file"''\
 	--preview-window=up:35% |\
 	awk '{print $NF}')
-[ -z "$id" ] && exit 0;
+[ -z "$id" ] && rm -f "$original_page" "$data_file" && exit 0
 
 # -- DOWNLOADING --
 download_page="$(mktemp)"
 dl_links=$(awk -F"\t" '$1=="'"$id"'" {print $10}' "$data_file")
 final_link=$(printf "$dl_links" | tr ' ' '\n' | awk '{printf "[%d]\t%s\n", NR, $0}' |  fzf --reverse | awk '{print $NF}')
+[ -z "$final_link" ] && rm -f "$original_page" "$data_file" "$download_page" && exit 0
 curl -s -L "$final_link" > "$download_page"
 
 # Get the main download link [GET]
-DOWNLOAD_URL=$(sed -n '/GET/s_.*<a href=["'\'']\(.*\)["'\'']>.*GET.*</a>.*_\1_p' "$download_page")
+GET_URL=$(sed -n '/GET/s_.*<a href=["'\'']\(.*\)["'\'']>.*GET.*</a>.*_\1_p' "$download_page")
 
 # Give option to select ipfs gateways (Cloudflare, IPFS.io, Crust, Pinata) if first link selected
 if printf "%s" "$final_link" | grep -q 'library.lol'; then
 	ipfs_gateways=$(sed -n '/Cloudflare/p' "$download_page" | sed 's_</li>_\n_g' | sed 's_.*<a href="\(.*\)">\(.*\)</a>.*_\2\t\1_;$d')
-	DOWNLOAD_URL=$(printf "[GET]\t%s\n%s" "$DOWNLOAD_URL" "$ipfs_gateways" |\
+	DOWNLOAD_URL=$(printf "[GET]\t%s\n%s" "$GET_URL" "$ipfs_gateways" |\
 		awk -F"\t" '{printf("%-20.20s %s\n", $1, $2)}' | fzf --reverse | awk '{print $NF}')
-	printf "%s" "$DOWNLOAD_URL"
+	[ -z "$DOWNLOAD_URL" ] && rm -f "$original_page" "$data_file" "$download_page" && exit 0
 	wget --content-disposition "$DOWNLOAD_URL"
 else
-	wget --content-disposition "https://libgen.rocks/$DOWNLOAD_URL"
+	wget --content-disposition "https://libgen.rocks/$GET_URL"
 fi
 
-rm -f "$original_page" "$data_file"
-rm -f "$download_page"
+rm -f "$original_page" "$data_file" "$download_page"
 
 printf "\nHere is the final link in case it didn't work:\n%s\n" "$final_link"
