@@ -8,7 +8,7 @@ else
 	mkdir $HOME/.config/libg > /dev/null
 	printf "DEFAULT_RESPERPAGE=100 # default number of search results per page\
 	\nDEFAULT_DEPTH=1 # default number of result pages to scan\
-	\nLIBGEN_MIRROR=\"https://libgen.rs\" # Alternatives : *.is, *.rs, *.st
+	\nLIBGEN_MIRROR=\"https://libgen.rs\" # Alternatives : *.is, *.rs, *.st\
 	\nDOWNLOAD_LOCATION=$HOME" > "$CONFIG_FILE"
 	source $CONFIG_FILE
 fi
