@@ -9,6 +9,7 @@ else
 	echo "DEFAULT_RESPERPAGE=100 # default number of search results per page" >> $CONFIG_FILE
 	echo "DEFAULTDEFAULT_DEPTH=1 # default result pages to scan" >> $CONFIG_FILE
 	echo "DEFAULTLIBGEN_MIRROR="https://libgen.rs" # Alternatives : *.is, *.rs, *.st" $CONFIG_FILE
+	source $CONFIG_FILE
 fi
 
 basic_help() {
