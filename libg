@@ -1,8 +1,15 @@
 #!/bin/sh
 
-DEFAULT_RESPERPAGE=100 # default number of search results per page
-DEFAULT_DEPTH=1 # default result pages to scan
-LIBGEN_MIRROR="https://libgen.rs" # Alternatives : *.is, *.rs, *.st
+CONFIG_FILE=$HOME/.config/libg/libg.sh
+if [[ -f $CONFIG_FILE ]] ; then
+	source $CONFIG_FILE
+
+else 
+	mkdir $HOME/.config/libg > /dev/null
+	echo "DEFAULT_RESPERPAGE=100 # default number of search results per page" >> $CONFIG_FILE
+	echo "DEFAULTDEFAULT_DEPTH=1 # default result pages to scan" >> $CONFIG_FILE
+	echo "DEFAULTLIBGEN_MIRROR="https://libgen.rs" # Alternatives : *.is, *.rs, *.st" $CONFIG_FILE
+fi
 
 basic_help() {
 	printf "libg: Shell Script to scrape library genesis website and download books right from the terminal.\
@@ -72,10 +79,10 @@ esac
 
 
 # -- GET SEARCH TERMS --
-SEARCHTERM="$*"
-if [ -z "$SEARCHTERM" ]; then
-	printf "Enter searchterm: "
-	read -r SEARCHTERM
+QUERY="$*"
+if [ -z "$QUERY" ]; then
+	printf "Enter query: "
+	read -r QUERY
 fi
 
 # -- SCRAPING --
@@ -86,7 +93,7 @@ while [ "$page" -le "$DEPTH" ]; do
 	printf "\033[1mGetting Page \033[35m$page... \033[0m"
 
 	curl -s -G "$LIBGEN_MIRROR/search.php" \
-		--data-urlencode "req=$SEARCHTERM" \
+		--data-urlencode "req=$QUERY" \
 		--data-urlencode "column=$SEARCHBY" \
 		--data-urlencode "res=$RESPERPAGE" \
 		--data-urlencode "page=$page" \
