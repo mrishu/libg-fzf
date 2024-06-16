@@ -2,12 +2,12 @@
 ![](libg.gif)
 
 **Library Genesis TUI** using **fzf**.  
-Using this, you can search the library genesis site (https://libgen.is), filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
+Using this, you can search the library genesis site (https://libgen.is or other mirrors like libgen.rs or libgen.st), filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
 
 ## Usage
 `libg [OPTIONS] <search query>`
 
-### Options:
+### Options
 ```
 OPTIONS        Description                               Allowed Values
 -------        -----------                               --------------
@@ -31,7 +31,7 @@ DOWNLOAD_LOCATION="" # default download location (if empty then books will be do
 **Note**: Giving any value except for 25, 50 or 100 for `DEFAULT_RESPERPAGE` will default it to 25.
 
 ## Installation
-Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `PATH`.
+Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `$PATH`.
 ## Dependency
 The only dependency is `fzf`: https://github.com/junegunn/fzf.   
 The other dependencies are `sed`(GNU), `awk`, `curl` and `wget` but are present by default in most Linux installs. 
