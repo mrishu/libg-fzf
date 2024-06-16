@@ -1,5 +1,4 @@
-# library_genesis-fzf (libg-fzf)
-![](libg.gif)
+# libg-fzf
 
 **Library Genesis TUI** using **fzf**.  
 Using this, you can search the library genesis site (https://libgen.is or https://libgen.rs or https://libgen.st), filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
