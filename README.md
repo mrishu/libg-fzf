@@ -33,6 +33,8 @@ DOWNLOAD_LOCATION="" # default download location (if empty then books will be do
 
 ## Installation
 Since it is just a small shell script, just download the script, give it executable permissions and place it in a directory that is in `$PATH`.
+
 ## Dependency
 The only dependency is `fzf`: https://github.com/junegunn/fzf.   
+This is usually available on standard linux repositories for almost all distributions.  
 The other dependencies are `sed`(GNU), `awk`, `curl` and `wget` but are present by default in most Linux installs. 
