@@ -2,7 +2,7 @@
 ![](libg.gif)
 
 **Library Genesis TUI** using **fzf**.  
-Using this, you can search the library genesis site (https://libgen.is or other mirrors like libgen.rs or libgen.st), filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
+Using this, you can search the library genesis site (https://libgen.is or https://libgen.rs or https://libgen.st), filter your book out using `fzf` as well as download the selected book by just pressing `Enter`; everything right from your terminal!
 
 ## Usage
 `libg [OPTIONS] <search query>`
@@ -19,6 +19,7 @@ OPTIONS        Description                               Allowed Values
 ```
 
 ## Config file
+This file is created automatically with default values after first use.  
 Edit `$HOME/.config/libg/libg.sh` to change default values:
 
 ```bash
