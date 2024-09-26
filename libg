@@ -8,7 +8,7 @@ else
 	mkdir -p "$CONFIG_DIR" > /dev/null
 	printf "DEFAULT_RESPERPAGE=100 # default number of search results per page (allowed values: 25, 50, 100)\
 	\nDEFAULT_DEPTH=1 # default number of result pages to scan (allowed values: any positive integer)\
-	\nLIBGEN_MIRROR=\"https://libgen.rs\" # alternatives: *.is, *.rs, *.st\
+	\nLIBGEN_MIRROR=\"https://libgen.is\" # alternatives: *.is, *.rs, *.st\
 	\nDOWNLOAD_LOCATION=\"\" # default download location (if empty then books will be downloaded to current directory)" > "$CONFIG_FILE"
 	. "$CONFIG_FILE"
 fi
